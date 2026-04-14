@@ -40,3 +40,27 @@ SELECT
 FROM TendenciaMensual
 WHERE Mes_Anio IS NOT NULL
 ORDER BY Mes_Anio ASC;
+
+-- ==============================================================================
+SELECT 
+    c.customer_state AS Estado_Destino,
+    AVG(DATEDIFF(day, TRY_CAST(o.order_purchase_timestamp AS DATETIME2), TRY_CAST(o.order_delivered_customer_date AS DATETIME2))) AS Promedio_Dias_Entrega, -- Calculamos el tiempo en que tardaron en llegar los pedidos en promedio para los clientes
+    MAX(DATEDIFF(day, TRY_CAST(o.order_purchase_timestamp AS DATETIME2), TRY_CAST(o.order_delivered_customer_date AS DATETIME2))) AS Maximo_Dias_Espera, -- Calculamos el peor tiempo de entrega
+    MIN(DATEDIFF(day, TRY_CAST(o.order_purchase_timestamp AS DATETIME2), TRY_CAST(o.order_delivered_customer_date AS DATETIME2))) AS Minimo_Dias_Espera-- Calculamos el mejor tiempo de entrega
+FROM ordenes o
+JOIN clientes c ON o.customer_id = c.customer_id
+WHERE o.order_status = 'delivered' AND o.order_delivered_customer_date IS NOT NULL
+GROUP BY c.customer_state
+ORDER BY Promedio_Dias_Entrega DESC;
+
+
+SELECT TOP 10
+    c.customer_unique_id AS ID_Cliente_Unico,
+    COUNT(DISTINCT o.order_id) AS Frecuencia_Compras, -- Clientes mas frecuentes
+    ROUND(SUM(i.price), 2) AS Valor_Monetario_Total_USD -- Total gastado por cada cliente en dolares
+FROM clientes c
+JOIN ordenes o ON c.customer_id = o.customer_id
+JOIN items_orden i ON o.order_id = i.order_id
+WHERE o.order_status = 'delivered'
+GROUP BY c.customer_unique_id
+ORDER BY Valor_Monetario_Total_USD DESC; 
