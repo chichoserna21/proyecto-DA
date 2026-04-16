@@ -1,3 +1,5 @@
+-- Query 1: rendimiento geografico y ticket promedio
+-- Pregunta de negocio: Cuales son los 10 estados que generan más ingresos, cual es su ticket promedio y qué porcentaje representa el costo de envio?
 WITH VentasPorEstado AS (
     SELECT 
         c.customer_state AS Estado,
@@ -21,7 +23,8 @@ FROM VentasPorEstado
 ORDER BY Ingresos_Totales DESC;
 
 -- ==============================================================================
-
+-- Query 2: tendencia de ventas mensual y tiempo de entrega por estado
+-- Pregunta de negocio: Cual es la tendencia de ventas mensual, cual es el ticket promedio por mes y cuanto tiempo tardan en llegar los pedidos por estado?
 WITH TendenciaMensual AS (
     SELECT 
         FORMAT(TRY_CAST(o.order_purchase_timestamp AS DATETIME2), 'yyyy-MM') AS Mes_Anio, -- Agrupamos por mes y año (formato yyyy - mm) ademas usamos TRY_CAST para evitar errores de conversion
@@ -42,6 +45,8 @@ WHERE Mes_Anio IS NOT NULL
 ORDER BY Mes_Anio ASC;
 
 -- ==============================================================================
+--Query 3: tiempo de entrega por estado y clientes mas frecuentes
+-- Cuales son los 10 estados que generan más ingresos, cual es su ticket promedio y que porcentaje representa el costo de envio?
 SELECT 
     c.customer_state AS Estado_Destino,
     AVG(DATEDIFF(day, TRY_CAST(o.order_purchase_timestamp AS DATETIME2), TRY_CAST(o.order_delivered_customer_date AS DATETIME2))) AS Promedio_Dias_Entrega, -- Calculamos el tiempo en que tardaron en llegar los pedidos en promedio para los clientes
@@ -54,6 +59,8 @@ GROUP BY c.customer_state
 ORDER BY Promedio_Dias_Entrega DESC;
 
 
+--Query 4: clientes mas frecuentes y valor monetario total gastado
+-- Pregunta de negocio: Cuales son los 10 clientes que mas han gastado en la plataforma, cuantas compras han realizado y cual es el valor monetario total gastado por cada cliente?
 SELECT TOP 10
     c.customer_unique_id AS ID_Cliente_Unico,
     COUNT(DISTINCT o.order_id) AS Frecuencia_Compras, -- Clientes mas frecuentes
